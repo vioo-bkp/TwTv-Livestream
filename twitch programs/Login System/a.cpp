@@ -6,118 +6,107 @@
 #include <iostream>
 using namespace std;
 
+bool verify_account(string username, string password) {
+  ifstream file;
+  file.open("users.txt");
+  string line;
+  while (getline(file, line)) {
+    if (line == username + " " + password) {
+      file.close();
+      return true;
+    }
+  }
+  file.close();
+  return false;
+}
 
-int main()
-{
-  
-  cout << endl << "Salut eu sunt PC ";
-  
+int create_user(string username, string password) {
+  ofstream file;
+  file.open("users.txt", ios::app);
+  file << username << " " << password << endl;
+  file.close();
 
   return 0;
 }
 
-// bool verify_account(string username, string password) {
-//   ifstream file;
-//   file.open("users.txt");
-//   string line;
-//   while (getline(file, line)) {
-//     if (line == username + " " + password) {
-//       file.close();
-//       return true;
-//     }
-//   }
-//   file.close();
-//   return false;
-// }
+// making a temp file to store the list of users, then if the user is found, we
+// remove them from the list and add the new one
 
-// //
-// int create_user(string username, string password) {
-//   ofstream file;
-//   file.open("users.txt", ios::app);
-//   file << username << " " << password << endl;
-//   file.close();
+void delete_user(string username) {
 
-//   return 0;
-// }
+  ifstream file;
+  file.open("users.txt");
+  string line;
+  ofstream temp;
+  temp.open("temp.txt");
+  while (getline(file, line)) {
+    std::string id(line.begin(), line.begin() + line.find(" "));
+    if (id != username) {
+      temp << line << endl;
+    }
+  }
+  file.close();
+  temp.close();
+  remove("users.txt");
+  rename("temp.txt", "users.txt");
+}
 
-// // making a temp file to store the list of users, then if the user is found, we
-// // remove them from the list and add the new one
+int main() {
+  string username, password;
+  cout << "!!!!!!!!!! WELCOME TO LOGIN ACCOUNT !!!!!!!!!!!!!" << endl;
+  cout << "Choose option:" << endl
+       << "1. Login " << endl
+       << "2. Register" << endl
+       << "3. Delete Account" << endl;
+  int choose_option;
+  cin >> choose_option;
+  if (choose_option == 1) {
+    cout << "Enter username: ";
+    cin >> username;
+    cout << "Enter password: ";
+    cin >> password;
+    if (verify_account(username, password)) {
 
-// void delete_user(string username) {
+      cout << "Account verified" << endl << "Welcome " << username << endl;
+      return 0;
 
-//   ifstream file;
-//   file.open("users.txt");
-//   string line;
-//   ofstream temp;
-//   temp.open("temp.txt");
-//   while (getline(file, line)) {
-//     std::string id(line.begin(), line.begin() + line.find(" "));
-//     if (id != username) {
-//       temp << line << endl;
-//     }
-//   }
-//   file.close();
-//   temp.close();
-//   remove("users.txt");
-//   rename("temp.txt", "users.txt");
-// }
+    } else {
+      cout << "Wrong password or username" << endl;
+      cout << "Do you want to create an account? (y/n)" << endl;
+      char answer;
+      cin >> answer;
+      if (answer == 'y') {
+        create_user(username, password);
+        cout << "Account created" << endl;
+      } else if (answer == 'n') {
 
-// int main() {
-//   string username, password;
-//   cout << "!!!!!!!!!! WELCOME TO LOGIN ACCOUNT !!!!!!!!!!!!!" << endl;
-//   cout << "Choose option:" << endl
-//        << "1. Login " << endl
-//        << "2. Register" << endl
-//        << "3. Delete Account" << endl;
-//   int choose_option;
-//   cin >> choose_option;
-//   if (choose_option == 1) {
-//     cout << "Enter username: ";
-//     cin >> username;
-//     cout << "Enter password: ";
-//     cin >> password;
-//     if (verify_account(username, password)) {
+        cout << "Thanks! Goodbye!" << endl;
+      }
+    }
+  } else if (choose_option == 2) {
+    cout << "Let's start registration: " << endl;
+    cout << "Enter username: ";
+    cin >> username;
+    cout << "Enter password: ";
+    cin >> password;
 
-//       cout << "Account verified" << endl << "Welcome " << username << endl;
-//       return 0;
+    verify_account(username, password);
 
-//     } else {
-//       cout << "Wrong password or username" << endl;
-//       cout << "Do you want to create an account? (y/n)" << endl;
-//       char answer;
-//       cin >> answer;
-//       if (answer == 'y') {
-//         create_user(username, password);
-//         cout << "Account created" << endl;
-//       } else if (answer == 'n') {
+    if (verify_account(username, password) == true) {
+      cout << "! Account already existing. Check again your info !" << endl;
 
-//         cout << "Thanks! Goodbye!" << endl;
-//       }
-//     }
-//   } else if (choose_option == 2) {
-//     cout << "Let's start registration: " << endl;
-//     cout << "Enter username: ";
-//     cin >> username;
-//     cout << "Enter password: ";
-//     cin >> password;
+    } else if (verify_account(username, password) == false) {
 
-//     verify_account(username, password);
+      create_user(username, password);
+      cout << "Account created" << endl;
+    }
+  } else if (choose_option == 3) {
+    // tell user the name for the account to be deleted
+    cout << "Enter username to be removed: ";
+    cin >> username;
+    delete_user(username);
+    cout << "Account deleted" << endl;
+  }
 
-//     if (verify_account(username, password) == true) {
-//       cout << "! Account already existing. Check again your info !" << endl;
-
-//     } else if (verify_account(username, password) == false) {
-
-//       create_user(username, password);
-//       cout << "Account created" << endl;
-//     }
-//   } else if (choose_option == 3) {
-//     // tell user the name for the account to be deleted
-//     cout << "Enter username to be removed: ";
-//     cin >> username;
-//     delete_user(username);
-//     cout << "Account deleted" << endl;
-//   }
-
-//   return 0;
-// }
+  return 0;
+}
